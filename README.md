@@ -9,5 +9,4 @@ Steps to follow:
 - Extract and save CONCH 1.5 and TITAN features using TRIDENT (https://github.com/mahmoodlab/TRIDENT) and save as h5 files.
 - Train and extract GECKO deep and concept features (https://github.com/surykntsingh/GECKO) and save as h5 files.
 - Set appropriate paths in config.yaml
-- Train and test and predict the report gen model with following command: `torchrun --nproc-per-node=6 --nnodes=1 train`
-- 
+- Train and test and predict the report gen model with following command: `torchrun --nproc-per-node=6 --nnodes=1 main.py train`
