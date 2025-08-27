@@ -9,6 +9,7 @@ import scispacy
 from spacy.tokens import Doc
 from typing import List, Tuple
 
+# Adapted from the code provided by REG challenge: https://github.com/hrb0/reg/tree/main/metric
 class EmbeddingEvaluator:
     def __init__(self, model_name):
         assert model_name in [

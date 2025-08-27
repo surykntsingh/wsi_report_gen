@@ -2,11 +2,14 @@ import typer
 import os
 from datamodules.wsi_embedding_datamodule import PatchEmbeddingDataModule, PatchEmbeddingDataPredictModule
 from models import ReportModel
+from modules.metrics import REG_Evaluator
 from report_tokenizers import Tokenizer
 from trainer import Trainer, KFoldTrainer
 import pandas as pd
-from utils.utils import save_model, get_params_for_key, copy_yaml, write_json_file
+import numpy as np
+from utils.utils import save_model, get_params_for_key, copy_yaml, write_json_file, read_json_file
 from datetime import datetime
+from tqdm.auto import tqdm
 
 app = typer.Typer()
 
@@ -16,7 +19,7 @@ app = typer.Typer()
 @app.command()
 def train(config_file_path: str='config.yaml', reg_threshold: float=0.8):
     args = get_params_for_key(config_file_path, "train")
-    split_frac = [0.87, 0.08, 0.05]
+    split_frac = [0.8, 0.1, 0.1]
     tokenizer = Tokenizer(args.reports_json_path)
     model = ReportModel(args, tokenizer)
 
@@ -49,7 +52,7 @@ def train(config_file_path: str='config.yaml', reg_threshold: float=0.8):
 
     if test_metrics['test_reg'].item() > reg_threshold:
         print(f'Generating predictions since reg_score > {reg_threshold}')
-        results = predict(best_model, trainer, args, tokenizer)
+        results = get_prediction(best_model, trainer, args, tokenizer)
         results_dir = f'{args.ckpt_path}/results_{test_metrics["test_reg"]}'
         print(f'Saving predictions at {results_dir}')
         save_results(results, results_dir)
@@ -87,7 +90,7 @@ def tune_gecko_features(args, tokenizer,best_model_path, trainer, datamodule, re
 
     if test_metrics['test_reg'].item() > reg_threshold:
         print(f'Generating predictions since reg_score > {reg_threshold}')
-        results = predict(best_model, trainer, args, tokenizer)
+        results = get_prediction(best_model, trainer, args, tokenizer)
         results_dir = f'{args.ckpt_path}/results_{test_metrics["test_reg"]}'
         print(f'Saving predictions at {results_dir}')
         save_results(results, results_dir)
@@ -116,7 +119,7 @@ def test(config_file_path: str='config.yaml', reg_threshold: float=0.8):
 
     if test_metrics['test_reg'].item() > reg_threshold:
         print(f'Generating predictions since reg_score > {reg_threshold}')
-        results = predict(model, trainer, args, tokenizer)
+        results = get_prediction(model, trainer, args, tokenizer)
         results_dir = f'{args.results_path}/results_{test_metrics["test_reg"]}'
         print(f'Saving predictions at {results_dir}')
         save_results(results, results_dir)
@@ -141,8 +144,45 @@ def trainkfold(config_file_path='config.yaml'):
     write_metrics(f'{args.results_path}/experiments', metrics, date)
 
 
+@app.command()
+def predict(config_file_path='config.yaml'):
+    args = get_params_for_key(config_file_path, "train")
+    tokenizer = Tokenizer(args.reports_json_path)
+    model = ReportModel.load_from_checkpoint(args.model_load_path, args=args, tokenizer=tokenizer)
 
-def predict(model, trainer, args, tokenizer):
+    split_frac = [0.85, 0.15]
+    trainer = Trainer(args, tokenizer, split_frac)
+    results = get_prediction(model, trainer, args, tokenizer)
+    results_dir = f'{args.results_path}/predicted_results'
+    os.makedirs(results_dir, exist_ok=True)
+
+    save_results(results, results_dir)
+
+@app.command()
+def collate_predictions(
+        prediction_paths: str, #comma seperated paths
+        output_path: str
+):
+    predictions = [ read_json_file(p) for p in prediction_paths.split(',')]
+    case_ids = [p['id'] for p in predictions[0]]
+
+    r = REG_Evaluator()
+    def get_similarity(t1, t2):
+        return r.evaluate_dummy([(t1, t2)])
+
+    predictions = [{p['id']:p['report']} for p in predictions]
+    cases_predictions = {i: [p[i] for p in predictions] for i in case_ids}
+    consensus_pred = {}
+    pbar = tqdm(cases_predictions.items(), total=len(cases_predictions))
+    for i, (case_id, preds) in enumerate(pbar):
+        result = choose_best_prediction(case_id, preds, get_similarity)
+        consensus_pred[case_id] = result
+
+    best_prediction = [{'id': consensus_pred[i]['case_id'], 'report': consensus_pred[i]['best_prediction']} for i in case_ids]
+    print(f'writing best prediction result to {output_path}')
+    save_results(best_prediction, output_path)
+
+def get_prediction(model, trainer, args, tokenizer):
     datamodule = PatchEmbeddingDataPredictModule(args, tokenizer)
     predictions = trainer.predict(model, datamodule, fast_dev_run=args.fast_dev_run)
     print('model predictions finished')
@@ -172,6 +212,35 @@ def save_results(results, results_dir):
 
 
 
-# args = parse_agrs()
+def choose_best_prediction(case_id, predictions, similarity_fn):
+    """
+    case_id: identifier for the case
+    predictions: list of str (e.g. 4 predictions for one case)
+    similarity_fn: function taking (text1, text2) -> float
+    returns: dict with case_id, best_prediction, index, and scores
+    """
+    n = len(predictions)
+    sim_matrix = np.zeros((n, n))
+
+    # Fill pairwise similarity matrix
+    for i in range(n):
+        for j in range(i + 1, n):
+            score = similarity_fn(predictions[i], predictions[j])
+            sim_matrix[i, j] = sim_matrix[j, i] = score
+
+    # Compute average similarity for each prediction
+    avg_scores = sim_matrix.sum(axis=1) / (n - 1)
+
+    # Pick the prediction with highest average similarity
+    best_idx = int(np.argmax(avg_scores))
+
+    return {
+        "case_id": case_id,
+        "best_prediction": predictions[best_idx],
+        "best_index": best_idx,
+        "scores": avg_scores.tolist()
+    }
+
+
 if __name__ == "__main__":
     app()
