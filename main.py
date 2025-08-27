@@ -111,7 +111,7 @@ def test(config_file_path: str='config.yaml', reg_threshold: float=0.8,
          save_model_pt=False):
 
     args = get_params_for_key(config_file_path, "train")
-    split_frac = [0.7, 0.20, 0.10]
+    split_frac = [0.7, 0.25, 0.05]
     tokenizer = Tokenizer(args.reports_json_path)
     datamodule = PatchEmbeddingDataModule(args, tokenizer, split_frac)
     trainer = Trainer(args, tokenizer, split_frac)
@@ -132,6 +132,7 @@ def test(config_file_path: str='config.yaml', reg_threshold: float=0.8,
     #     print(f'Not generating predictions since reg_score < {reg_threshold}')
 
     if save_model_pt:
+        os.makedirs(args.model_save_path, exist_ok=True)
         torch.save(model.state_dict(), f"{args.model_save_path}/model_weights.pt")
 
 
