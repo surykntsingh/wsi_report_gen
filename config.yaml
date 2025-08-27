@@ -1,0 +1,42 @@
+
+train:
+  max_fea_length: 1000
+  max_seq_length: 400
+  threshold: 1
+  num_workers: 2
+  batch_size: 1
+  max_epochs: 200
+  d_model: 512
+  d_ff: 512
+  d_vf: 768
+  num_heads: 8
+  num_layers: 6
+  dropout: 0.3
+  weight_decay: 0.05
+  logit_layers: 1
+  bos_idx: 0
+  eos_idx: 0
+  pad_idx: 0
+  use_bn: 0
+  drop_prob_lm: 0.4
+  sample_method: beam_search
+  beam_size: 10
+  temperature: 1.5
+  sample_n: 1
+  group_size: 5
+  output_logsoftmax: 1
+  decoding_constraint: 1
+  suppress_UNK: 1
+  block_trigrams: 1
+  lr: 0.00005
+  d1: 768
+  d2: 768
+  embeddings_path: <your TITAN feature path>
+  embeddings_path_2: <your CONCH 1.5 feature path>
+  reports_json_path: <your ground truth reports path>
+  ckpt_path: <your model checkpoints path>
+  model_load_path: <your model load path>
+  results_path: <your results save path>
+  devices: 6
+  fast_dev_run: false
+  num_folds: 3
