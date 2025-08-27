@@ -179,8 +179,8 @@ def predict(config_file_path='config.yaml', pt=True):
 
 @app.command()
 def collate_predictions(
-        prediction_paths: str='', #comma seperated paths
-        output_path: str=''
+        prediction_paths: str, #comma seperated paths
+        output_path: str
 ):
     predictions = [ read_json_file(p) for p in prediction_paths.split(',')]
     case_ids = [p['id'] for p in predictions[0]]
