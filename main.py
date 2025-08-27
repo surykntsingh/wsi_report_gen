@@ -1,5 +1,6 @@
 import typer
 import os
+import torch
 from datamodules.wsi_embedding_datamodule import PatchEmbeddingDataModule, PatchEmbeddingDataPredictModule
 from models import ReportModel
 from modules.metrics import REG_Evaluator
@@ -17,7 +18,7 @@ app = typer.Typer()
 
 
 @app.command()
-def train(config_file_path: str='config.yaml', reg_threshold: float=0.8):
+def train(config_file_path: str='config.yaml', reg_threshold: float=0.8, save_model_pt=True):
     args = get_params_for_key(config_file_path, "train")
     split_frac = [0.8, 0.1, 0.1]
     tokenizer = Tokenizer(args.reports_json_path)
@@ -65,6 +66,9 @@ def train(config_file_path: str='config.yaml', reg_threshold: float=0.8):
 
     # tune_gecko_features(args, tokenizer, best_model_path, trainer, datamodule, reg_threshold, date)
 
+    if save_model_pt:
+        torch.save(model.state_dict(), f"{args.model_save_path}/model_weights.pt")
+
 
 
 def tune_gecko_features(args, tokenizer,best_model_path, trainer, datamodule, reg_threshold, date):
@@ -103,7 +107,8 @@ def tune_gecko_features(args, tokenizer,best_model_path, trainer, datamodule, re
 
 
 @app.command()
-def test(config_file_path: str='config.yaml', reg_threshold: float=0.8):
+def test(config_file_path: str='config.yaml', reg_threshold: float=0.8,
+         save_model_pt=False):
 
     args = get_params_for_key(config_file_path, "train")
     split_frac = [0.7, 0.10, 0.20]
@@ -125,6 +130,10 @@ def test(config_file_path: str='config.yaml', reg_threshold: float=0.8):
         save_results(results, results_dir)
     else:
         print(f'Not generating predictions since reg_score < {reg_threshold}')
+
+    if save_model_pt:
+        torch.save(model.state_dict(), f"{args.model_save_path}/model_weights.pt")
+
 
 
 @app.command()

@@ -1,42 +1,51 @@
 
 train:
-  max_fea_length: 1000
-  max_seq_length: 400
+  max_fea_length: 2000
+  max_seq_length: 320
   threshold: 1
   num_workers: 2
   batch_size: 1
   max_epochs: 200
-  d_model: 512
-  d_ff: 512
-  d_vf: 768
+  d_model: 1536
+  d_ff: 1024
+  d_vf: 1024
   num_heads: 8
-  num_layers: 6
-  dropout: 0.3
-  weight_decay: 0.05
-  logit_layers: 1
+  num_layers: 3
+  dropout: 0.2
+  dropout_mlp: 0.2
+  weight_decay: 0.01
+  logit_layers: 3
   bos_idx: 0
   eos_idx: 0
   pad_idx: 0
   use_bn: 0
   drop_prob_lm: 0.4
-  sample_method: beam_search
-  beam_size: 10
-  temperature: 1.5
+  sample_method: greedy
+  beam_size: 6
+  temperature: 0.8
   sample_n: 1
-  group_size: 5
+  group_size: 1
   output_logsoftmax: 1
   decoding_constraint: 1
   suppress_UNK: 1
   block_trigrams: 1
-  lr: 0.00005
+  lr: 7.0e-05
+  lr_patience: 4
   d1: 768
   d2: 768
-  embeddings_path: <your TITAN feature path>
-  embeddings_path_2: <your CONCH 1.5 feature path>
-  reports_json_path: <your ground truth reports path>
-  ckpt_path: <your model checkpoints path>
+  gd: 512
+  gcd: 66
+  embeddings_path: <Your TITAN features path>
+  embeddings_path_2: <your CONCH 1.5 features path>
+  gecko_emb_path: <your GECKO features path>
+  reports_json_path: <your reports json path>
+  ckpt_path: <model experiment dir path>
   model_load_path: <your model load path>
+  model_save_path: <your model save path>
   results_path: <your results save path>
+  predict_embeddings_path_1: <Your TITAN features path for prediction>
+  predict_embeddings_path_2: <your CONCH 1.5 features path for prediction>
+  gecko_predict_emb_path: <your GECKO features path for prediction>
   devices: 6
   fast_dev_run: false
   num_folds: 3
