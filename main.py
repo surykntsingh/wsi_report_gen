@@ -178,7 +178,7 @@ def predict(config_file_path='config.yaml', pt=True):
     save_results(results, results_dir)
 
 @app.command()
-def collate_predictions(
+def collatepredictions(
         prediction_paths: str, #comma seperated paths
         output_path: str
 ):
