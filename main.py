@@ -108,16 +108,21 @@ def tune_gecko_features(args, tokenizer,best_model_path, trainer, datamodule, re
 
 @app.command()
 def test(config_file_path: str='config.yaml', reg_threshold: float=0.8,
-         save_model_pt=False):
+         save_model_pt=True,
+         pt=True):
 
     args = get_params_for_key(config_file_path, "train")
-    split_frac = [0.7, 0.25, 0.05]
+    split_frac = [0.7, 0.2, 0.1]
     tokenizer = Tokenizer(args.reports_json_path)
     datamodule = PatchEmbeddingDataModule(args, tokenizer, split_frac)
     trainer = Trainer(args, tokenizer, split_frac)
 
     print(f'loading best model from {args.model_load_path}')
-    model = ReportModel.load_from_checkpoint(args.model_load_path, args=args, tokenizer=tokenizer)
+    if pt:
+        model = ReportModel(args, tokenizer)
+        model.load_state_dict(torch.load(args.model_load_path))
+    else:
+        model = ReportModel.load_from_checkpoint(args.model_load_path, args=args, tokenizer=tokenizer)
     test_metrics, tr = trainer.test(model, datamodule, fast_dev_run=args.fast_dev_run)
     print(f'test_metrics: {test_metrics}')
     print('model testing finished')
@@ -155,10 +160,14 @@ def trainkfold(config_file_path='config.yaml'):
 
 
 @app.command()
-def predict(config_file_path='config.yaml'):
+def predict(config_file_path='config.yaml', pt=True):
     args = get_params_for_key(config_file_path, "train")
     tokenizer = Tokenizer(args.reports_json_path)
-    model = ReportModel.load_from_checkpoint(args.model_load_path, args=args, tokenizer=tokenizer)
+    if pt:
+        model = ReportModel(args, tokenizer)
+        model.load_state_dict(torch.load(args.model_load_path))
+    else:
+        model = ReportModel.load_from_checkpoint(args.model_load_path, args=args, tokenizer=tokenizer)
 
     split_frac = [0.85, 0.15]
     trainer = Trainer(args, tokenizer, split_frac)
