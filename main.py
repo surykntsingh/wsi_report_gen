@@ -127,14 +127,14 @@ def test(config_file_path: str='config.yaml', reg_threshold: float=0.8,
     print(f'test_metrics: {test_metrics}')
     print('model testing finished')
 
-    # if test_metrics['test_reg'].item() > reg_threshold:
-    #     print(f'Generating predictions since reg_score > {reg_threshold}')
-    #     results = get_prediction(model, trainer, args, tokenizer)
-    #     results_dir = f'{args.results_path}/results_{test_metrics["test_reg"]}'
-    #     print(f'Saving predictions at {results_dir}')
-    #     save_results(results, results_dir)
-    # else:
-    #     print(f'Not generating predictions since reg_score < {reg_threshold}')
+    if test_metrics['test_reg'].item() > reg_threshold:
+        print(f'Generating predictions since reg_score > {reg_threshold}')
+        results = get_prediction(model, trainer, args, tokenizer)
+        results_dir = f'{args.results_path}/results_{test_metrics["test_reg"]}'
+        print(f'Saving predictions at {results_dir}')
+        save_results(results, results_dir)
+    else:
+        print(f'Not generating predictions since reg_score < {reg_threshold}')
 
     if save_model_pt:
         os.makedirs(args.model_save_path, exist_ok=True)
