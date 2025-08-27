@@ -189,7 +189,7 @@ def collate_predictions(
     def get_similarity(t1, t2):
         return r.evaluate_dummy([(t1, t2)])
 
-    predictions = [{p['id']:p['report']} for p in predictions]
+    predictions = [{r['id']:r['report'] for r in p} for p in predictions]
     cases_predictions = {i: [p[i] for p in predictions] for i in case_ids}
     consensus_pred = {}
     pbar = tqdm(cases_predictions.items(), total=len(cases_predictions))
