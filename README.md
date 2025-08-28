@@ -4,16 +4,16 @@ Automated Histology Report Generation via Concept-Level Interpretability and Fou
 </h1>
 
 ## Env setup
-conda create -n wsi_rgen python=3.11
-conda activate wsi_rgen
-pip install -r requirements.txt
+- conda create -n wsi_rgen python=3.11
+- conda activate wsi_rgen
+- pip install -r requirements.txt
 
 ## Extract and save CONCH, CONCH1.5 and TITAN features
 Use [TRIDENT](https://github.com/mahmoodlab/TRIDENT) to create and save foundation model features for the train and test datasets in h5 format
 
 ## Train and extract GECKO deep and concept features
 Use following scripts from [GECKO](https://github.com/surykntsingh/GECKO)
-- Generate concept priors using CONCH features using `[conch_feat_deep_to_cosine_sim_proj.py](https://github.com/surykntsingh/GECKO/blob/main/conch_feat_deep_to_cosine_sim_proj.py)` and `[curate_cosinesim_conch.py](https://github.com/surykntsingh/GECKO/blob/main/curate_cosinesim_conch.py)`
+- Generate concept priors with CONCH features using [conch_feat_deep_to_cosine_sim_proj.py](https://github.com/surykntsingh/GECKO/blob/main/conch_feat_deep_to_cosine_sim_proj.py) and [curate_cosinesim_conch.py](https://github.com/surykntsingh/GECKO/blob/main/curate_cosinesim_conch.py)
 - Train model:
 ```  python train_gecko.py \
 --keep_ratio 0.7 \
