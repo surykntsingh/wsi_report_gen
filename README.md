@@ -14,7 +14,7 @@ Use [TRIDENT](https://github.com/mahmoodlab/TRIDENT) to create and save foundati
 ## Train and extract GECKO deep and concept features
 Use following scripts from [GECKO](https://github.com/surykntsingh/GECKO)
 - Generate concept priors with CONCH features using [conch_feat_deep_to_cosine_sim_proj.py](https://github.com/surykntsingh/GECKO/blob/main/conch_feat_deep_to_cosine_sim_proj.py) and [curate_cosinesim_conch.py](https://github.com/surykntsingh/GECKO/blob/main/curate_cosinesim_conch.py)
-- Train model:
+- Train gecko model:
 ```  python train_gecko.py \
 --keep_ratio 0.7 \
 --top_k 10 \
