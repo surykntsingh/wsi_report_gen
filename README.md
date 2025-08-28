@@ -37,7 +37,7 @@ CUDA_VISIBLE_DEVICES=6 python infer_gecko.py \
 ## Train, test and predict Report generation
 - Set appropriate paths in [config.yaml](https://github.com/surykntsingh/wsi_report_gen/blob/main/config.yaml)
 - Train and test and predict the report gen model with following command: 
-```torchrun --nproc-per-node=6 --nnodes=1 main.py train```
+```torchrun --nproc-per-node=6 --nnodes=1 main.py train --config-file-path <config.yaml path>``
 - Repeat 3-5 experiments with perturbation by changing hyperparams like `num_layers, d_vf, d_ff, dropout etc` and generate corresponding predictions.
 - Collate the generated reports to a single final report by using the maximum agreement logic using following command:
 ```

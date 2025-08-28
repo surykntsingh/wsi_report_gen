@@ -18,7 +18,7 @@ app = typer.Typer()
 
 
 @app.command()
-def train(config_file_path: str='config.yaml', reg_threshold: float=0.8, save_model_pt=True):
+def train(config_file_path: str='config.yaml', reg_threshold: float=0, save_model_pt=True):
     args = get_params_for_key(config_file_path, "train")
     split_frac = [0.8, 0.1, 0.1]
     tokenizer = Tokenizer(args.reports_json_path)
@@ -107,7 +107,7 @@ def tune_gecko_features(args, tokenizer,best_model_path, trainer, datamodule, re
 
 
 @app.command()
-def test(config_file_path: str='config.yaml', reg_threshold: float=0.8,
+def test(config_file_path: str='config.yaml', reg_threshold: float=0,
          save_model_pt=True,
          pt=True):
 
