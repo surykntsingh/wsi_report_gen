@@ -27,7 +27,7 @@ Use following scripts from [GECKO](https://github.com/surykntsingh/GECKO)
 ```
 - Infer and save gecko features:
 ```
-CUDA_VISIBLE_DEVICES=6 python infer_gecko.py \
+python infer_gecko.py \
 --features_deep_path <your_conch_feature_path> \
 --features_path <your_concept_prior_path> \
 --out_path <your_output_path> \
